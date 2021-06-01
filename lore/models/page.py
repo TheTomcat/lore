@@ -3,6 +3,7 @@ from lore import db, ma
 from lore.models.alias import Alias
 from lore.models.secondary import page_tags, page_links
 from lore.models.paragraph import Paragraph
+from lore.stub import Stub
 
 class Page(db.Model):
     """A page in the wiki.
@@ -31,15 +32,15 @@ class Page(db.Model):
     permalink = db.Column(db.String, index=True, nullable=True)
 
     title = db.Column(db.String, nullable=False)
-    stub = db.Column(db.String, index=True, nullable=False)
+    stub = db.Column(Stub, index=True, nullable=False)
     icon = db.Column(db.String)
 
     paragraphs = db.relationship("Paragraph", back_populates="page")
 
     # Tree structure
     parent_id = db.Column(db.Integer, db.ForeignKey('pages.page_id'))
-    parent = db.relationship('Page', remote_side=[page_id])
-    order = db.Column(db.Integer, default=0)
+    parent = db.relationship('Page', remote_side=[page_id], back_populates="children")
+    #order = db.Column(db.Integer, default=0)
     children = db.relationship('Page')
     depth = db.Column(db.Integer, default=0)
 

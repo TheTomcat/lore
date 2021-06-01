@@ -7,12 +7,9 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from marshmallow import ValidationError
 import jwt
 
-# from models import user
-
 api = Blueprint('api', __name__)
 
 from lore import db
-
 from lore.models.schema import *
 
 def token_required(f):
@@ -35,27 +32,33 @@ def token_required(f):
 def build_response(message, code=200):
     return {'message': message}, code
 
-def get_all(obj, sch, endpoint):
+def get_all(obj, sch, endpoint, paginate=False):
     try:
-        page = request.args.get('page',1,type=int)
-        per_page = request.args.get('per_page',20,type=int)
-        ref = obj.query.paginate(page, per_page, False)
-        output = {
-            'items': sch.dump(ref.items),
-            '_meta': {
-                'page': page,
-                'per_page': per_page,
-                'total_pages': ref.pages,
-                'total_items': ref.total
-            },
-            '_links': {
-                'self': request.full_path,
-                'next': url_for(f'api.{endpoint}', 
-                    page=page+1, per_page=per_page) if ref.has_next else None,
-                'prev': url_for(f'api.{endpoint}', 
-                    page=page-1, per_page=per_page) if ref.has_prev else None,
+        if paginate:
+            page = request.args.get('page',1,type=int)
+            per_page = request.args.get('per_page',20,type=int)
+            ref = obj.query.paginate(page, per_page, False)
+            output = {
+                'items': sch.dump(ref.items),
+                '_meta': {
+                    'page': page,
+                    'per_page': per_page,
+                    'total_pages': ref.pages,
+                    'total_items': ref.total
+                },
+                '_links': {
+                    'self': request.full_path,
+                    'next': url_for(f'api.{endpoint}', 
+                        page=page+1, per_page=per_page) if ref.has_next else None,
+                    'prev': url_for(f'api.{endpoint}', 
+                        page=page-1, per_page=per_page) if ref.has_prev else None,
+                }
             }
-        }
+        else:
+            ref = obj.query.all()
+            output = {'items': sch.dump(ref),
+                      '_links': {'self': request.full_path}
+                     }
         return output #sch.dump(obj.query.all())
     except Exception as e:
         return build_response(f"error {str(e)}", 500)
@@ -100,7 +103,7 @@ def update(obj, sch, pk):
             setattr(o, key, val)
         db.session.add(o)
         db.session.commit()
-        return build_response(f"updated user id:{pk}")
+        return build_response(f"updated id:{pk}")
     except Exception as e:
         return build_response(f"error: {str(e)}", 500)
 
@@ -130,15 +133,31 @@ def update_user(pk):
 
 @api.get('/page')
 def get_pages():
-    return get_all(Page, pages_schema, 'get_pages')
+    return get_all(Page, pages_schema, 'get_pages', paginate=True)
 
 @api.get('/page/<int:pk>')
 def get_page(pk):
     return get_one(Page, page_schema, pk)
 
+@api.get('/page/<int:pk>/paragraphs')
+def get_page_paragraphs():
+    return ""
+
+
 @api.get('/page/stub/<string:stub>')
 def get_page_by_stub(stub):
     return get_one(Page, page_schema, 0, stub=stub)
+
+@api.put('/page/<int:pk>/set_parent')
+def set_parent_page(pk):
+    try:
+        this = Page.get(pk)
+        data = request.get_json()
+        parent_id = data.parent_id
+        parent = Page.get(parent_id)
+        this.set_parent(parent)
+    except Exception as e:
+        return build_response(f'invalid request, {str(e)}', 400)
 
 @api.post('/page')
 def new_page():
@@ -174,6 +193,25 @@ def get_page_tree(pk):
         return build_response("Page not found", 404)
     return as_tree(page)
 
+@api.put('/page/<int:pk>/tag')
+def tag_page(pk, tagpk, add_or_remove):
+    try:
+        page = Page.get(pk)
+        data = request.get_json()
+        tagpk = data.tag_id
+        add_or_remove = data.add_or_remove
+        tag = Tag.get(tagpk)
+        if add_or_remove == "add":
+            if tag not in page.tags:
+                page.tags.append(tag)
+        elif add_or_remove == "remove":
+            if tag in page.tags:
+                page.tags.remove(tag)
+                return build_response('success')
+        else:
+            return build_response('invalid verb', 400)
+    except Exception as e:
+        return build_response(f'invalid request {str(e)}', 400)
 
 @api.get('/tag')
 def get_tags():
@@ -182,6 +220,14 @@ def get_tags():
 @api.get('/tag/<int:pk>')
 def get_tag(pk):
     return get_one(Tag, tag_schema, pk)
+
+@api.get('/paragraph/<int:pk>')
+def get_paragraph(pk):
+    return get_one(Paragraph, paragraph_schema, pk)
+
+@api.put('/paragraph/<int:pk>')
+def update_paragraph(pk):
+    return update(Paragraph, paragraph_schema, pk)
 
 
 # ## Campaign endpoint

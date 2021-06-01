@@ -1,16 +1,21 @@
 from datetime import datetime
 
+from sqlalchemy import TypeDecorator, String
+import hashids
+
 from lore import db, ma 
 from lore.models.page import Page
 from lore.models.alias import Alias
 from lore.models.tag import Tag
 from lore.models.secondary import campaign_membership
+from lore.stub import Stub
 
+SALT = "not so securesd"
 
 class Campaign(db.Model):
     __tablename__ = "campaigns"
     campaign_id = db.Column(db.Integer, primary_key=True)
-    stub = db.Column(db.String, unique=True, index=True, nullable=False)
+    stub = db.Column(Stub, unique=True, index=True, nullable=False)
     name = db.Column(db.String)
 
     created_on = db.Column(db.DateTime, default=datetime.utcnow)
@@ -26,6 +31,23 @@ class Campaign(db.Model):
     # aliases = db.relationship("Alias", back_populates="campaign")
     tags = db.relationship("Tag", back_populates="campaign")
 
+    _hasher = hashids.Hashids(salt=SALT,min_length=8)
+
+    @property
+    def uid(self):
+        return self._hasher.encode(self.campaign_id)
+    
+    @classmethod
+    def uid_get(self, uid):
+        ids = self._hasher.decode(uid)
+        if len(ids) == 1:
+            return Campaign.query.get(ids[0])
+        else:
+            return Campaign.query.filter(Campaign.campaign_id.in_(ids)).all()
+
+    # @property
+    # def uid(self):
+    #     return hasher(self.campaign_id)
 
     # media = db.relationship("Media", back_populates="campaign")
     # groups = db.relationship("Group", back_populates="campaign")

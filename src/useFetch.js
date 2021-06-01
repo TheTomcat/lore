@@ -1,4 +1,5 @@
 import {useState, useEffect} from 'react';
+const axios = require('axios');
 
 const useFetch = ( uri ) => {
     
@@ -7,20 +8,19 @@ const useFetch = ( uri ) => {
     const [error, setError] = useState(null);
 
     useEffect( () => {
-
-        const abortCont = new AbortController();
-
+        const options = {
+            url: uri,
+            method:'get'
+        }
         setTimeout(() => {
-        fetch(uri, { signal: abortCont.signal })
+        axios(options)
         .then(res => {
-            if (!res.ok) {
-                throw Error('Could not fetch data from that resource');
-            }
-            return res.json()
-        })
-        .then(data => {
+            // if (!res.ok) {
+            //     throw Error('Could not fetch data from that resource');
+            // }
+            // console.log(res.data);
             setError(null);
-            setData(data);
+            setData(res.data);
             setIsPending(false);
         })
         .catch( (err) => {
@@ -32,7 +32,7 @@ const useFetch = ( uri ) => {
             }
         })
         }, 1000);
-        return () => abortCont.abort();
+        return 
     }, [uri]);
 
     return {data, isPending, error};

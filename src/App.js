@@ -3,9 +3,11 @@ import { useState, createContext } from 'react';
 import Navbar from './Navbar';
 import Home from './Home';
 import Create from './Create';
-import BlogDetails from './BlogDetails';
+import PageDetails from './PageDetails';
 import NotFound from './NotFound';
 import Login from './Login'
+import PageEditor from './PageEditor';
+import { IconContext } from 'react-icons/lib';
 
 export const UserContext = createContext();
 export const CampaignContext = createContext();
@@ -30,18 +32,24 @@ function App() {
       <CampaignContext.Provider value={currentCampaign}>
         <Router>
           <div className="App">
-            <Navbar />
-            <div className="content">
-              <Switch>
-                <Route exact path="/" component={Home} />
-                <Route exact path="/create" component={Create} />
-                <Route exact path="/login" component={Login} />
-                <Route path="/blogs/:id" component={BlogDetails} />
-                <Route path="*" component={NotFound} />
-              </Switch>
-            </div>
+            <IconContext.Provider value={{ className: 'react-icons', size:'2rem' }}>
+              <Navbar />
+            </IconContext.Provider>
+            <main>
+              <div className="content">
+                <Switch>
+                  <Route exact path="/" component={Home} />
+                  <Route exact path="/create" component={Create} />
+                  <Route exact path="/Test/:id" component={PageEditor} />
+                  <Route exact path="/login" component={Login} />
+                  <Route path="/page/:id" component={PageDetails} />
+                  <Route path="*" component={NotFound} />
+                </Switch>
+              </div>
+            </main>
           </div>
         </Router>
+        
       </CampaignContext.Provider>
     </UserContext.Provider>
   );

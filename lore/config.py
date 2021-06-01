@@ -25,3 +25,5 @@ class Config(object):
     JWT_SECRET_KEY = SECRET_KEY
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=1)
     JWT_REFRESH_TOKEN_EXPIRES = timedelta(days=30)
+
+    HASHID_SALT = os.environ.get('HASHIDS_SALT') or 'not very secure'

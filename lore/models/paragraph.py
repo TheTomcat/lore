@@ -5,7 +5,7 @@ from lore import db
 class Paragraph(db.Model):
     ## https://docs.sqlalchemy.org/en/14/orm/extensions/hybrid.html
     __tablename__ = 'paragraphs'
-    section_id = db.Column(db.Integer, primary_key=True)
+    paragraph_id = db.Column(db.Integer, primary_key=True)
     
     page_id = db.Column(db.Integer, db.ForeignKey('pages.page_id'))
     page = db.relationship("Page", back_populates="paragraphs")

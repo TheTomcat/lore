@@ -1,8 +1,12 @@
 from marshmallow import fields, INCLUDE
 from marshmallow.decorators import pre_load
+from marshmallow.exceptions import ValidationError
+from sqlalchemy.orm import load_only
 from werkzeug.security import generate_password_hash, check_password_hash
+from hashids import Hashids
 
 from lore import ma
+from lore.stub.stub import validate_stub, StubError, HashError
 
 from lore.models.alias import Alias
 from lore.models.campaign import Campaign
@@ -10,10 +14,38 @@ from lore.models.page import Page
 from lore.models.paragraph import Paragraph
 from lore.models.tag import Tag
 from lore.models.user import User
+from lore.config import Config 
+
+# hasher = Hashids(salt=Config.HASHID_SALT, min_length=8)
+
+class StubField(fields.Field):
+    def _deserialize(self, value, attr, data, **kwargs):
+        try:
+            return validate_stub(value)
+        except StubError as e:
+            raise ValidationError("Invalid stub") from e
+
+class UID(fields.Field):
+    def __init__(self, hasher=None, *args, **kwargs):
+        self._hasher=hasher
+        super().__init__(*args, **kwargs)
+    def _deserialize(self, value, attr, data, **kwargs):
+        try:
+            return self._hasher.decode(value)[0]
+        except HashError as e:
+            raise IndexError("Hash error") from e
+    def _serialize(self, value, attr, obj, **kwargs):
+        try:
+            return self._hasher.encode(value)
+        except HashError as e:
+            raise IndexError("Hash error") from e
 
 class CampaignSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = Campaign
+    stub = StubField()
+    uid = fields.String()
+    # campaign_id = UID(hasher=Campaign._hasher)
 
 class Password(fields.Field):
     def _deserialize(self, value, attr, obj, **kwargs):
@@ -36,48 +68,53 @@ class AliasSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = Alias
 
-class PageSchema(ma.SQLAlchemyAutoSchema):
-    class Meta:
-        model = Page
-
-# class PageTreeChildNodeSchema(ma.SQLAlchemySchema):
-#     class Meta:
-#         model = Page
-#     page_id = ma.auto_field()
-#     has_children = fields.Boolean()
-#     _get_children = ma.URLFor('api.get_page_tree', values={'pk':'<page_id>', '_external':False})
-
-# class PageTreeSchema(ma.SQLAlchemySchema):
-#     class Meta:
-#         model = Page
-#     page_id = ma.auto_field()
-#     children = fields.List(fields.Nested(PageTreeChildNodeSchema))
-#     has_children = fields.Boolean()
-#     _get_children = ma.URLFor('api.get_page_tree', values={'pk':'<page_id>', '_external':False})
-
 class ParagraphSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = Paragraph
+    # paragraph_id = UID()
+    _links = ma.Hyperlinks({
+        'self':ma.URLFor('api.get_paragraph', values={'pk':'<paragraph_id>', '_external':False})
+    })
 
 class TagSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = Tag
 
-campaign_schema = CampaignSchema()#trict=True)
+class PageSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = Page
+    # page_id = UID()
+    _links = ma.Hyperlinks({
+        'self':ma.URLFor('api.get_page', values={'pk':'<page_id>', '_external':False})
+    })
+    stub = StubField()
+    paragraphs = fields.Nested(ParagraphSchema, many=True, only=('paragraph_id', 'order', 'title'))
+    children = fields.Nested(lambda: PageSchema(only=('page_id','title','stub')))
+    parent = fields.Nested(lambda: PageSchema(only=('page_id','title','stub'))) 
+
+class PageParagraphSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = Page
+    # page_id = UID()
+    paragraphs = fields.Nested(ParagraphSchema, many=True)
+    stub = StubField()
+    children = fields.Nested(lambda: PageSchema(only=('page_id','title','stub')))
+    parent = fields.Nested(lambda: PageSchema(only=('page_id','title','stub'))) 
+
+campaign_schema = CampaignSchema()
 campaigns_schema = CampaignSchema(many=True)
 
-user_schema = UserSchema()#trict=True)
+user_schema = UserSchema()
 users_schema = UserSchema(many=True)
 
-alias_schema = AliasSchema()#trict=True)
+alias_schema = AliasSchema()
 aliases_schema = AliasSchema(many=True)
 
-page_schema = PageSchema()#trict=True)
+page_schema = PageParagraphSchema()
 pages_schema = PageSchema(many=True)
-# page_tree_schema = PageTreeSchema()
 
-paragraph_schema = ParagraphSchema()#trict=True)
+paragraph_schema = ParagraphSchema()
 paragraphs_schema = ParagraphSchema(many=True)
 
-tag_schema = TagSchema()#trict=True)
+tag_schema = TagSchema()
 tags_schema = TagSchema(many=True)

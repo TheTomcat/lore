@@ -6,6 +6,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_marshmallow import Marshmallow
 from flask_jwt_extended import JWTManager
+from flask_cors import CORS
 
 from logging.handlers import RotatingFileHandler
 
@@ -15,6 +16,7 @@ db = SQLAlchemy()
 migrate = Migrate()
 ma = Marshmallow()
 jwt = JWTManager()
+cors = CORS()
 
 def create_app(config_class=Config):
     app = Flask(__name__)
@@ -24,6 +26,7 @@ def create_app(config_class=Config):
     migrate.init_app(app,db)
     ma.init_app(app)
     jwt.init_app(app)
+    cors.init_app(app)
 
     from lore.routes import api
     app.register_blueprint(api)
