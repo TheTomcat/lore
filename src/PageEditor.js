@@ -33,6 +33,7 @@ const ParagraphEditor = (props) => {
   const [ isPending, setIsPending ] = useState(true);
   const [ error, setError ] = useState(null);
   const [ editable, setEditable ] = useState(true);
+  const [ style, setStyle ] = useState('');
   
   document.execCommand('defaultParagraphSeparator', false, 'br');
 
@@ -47,6 +48,7 @@ const ParagraphEditor = (props) => {
     .then((response) => {
       body.current = response.data['body'];
       title.current = response.data['title'];
+      setStyle(response.data['style']);
       setIsPending(false);
       setError(null);
     })

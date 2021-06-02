@@ -13,18 +13,18 @@ export const UserContext = createContext();
 export const CampaignContext = createContext();
 
 function App() {
-  const [ username, setUsername ] = useState(null);
-  const [ campaign_id, setCampaign ] = useState(null);
+  const [ user, setUser ] = useState(null);
+  const [ campaign, setCampaign ] = useState(null);
 
   const currentUser = {
-    username: username,
-    loginUser: (_username) => {setUsername(_username)},
-    logoutUser: () => {setUsername(null)}
+    user: user,
+    loginUser: (_user) => {setUser(_user)},
+    logoutUser: () => {setUser(null)}
   }
 
   const currentCampaign = {
-    campaign_id: campaign_id,
-    useCampaign: (_campaign_id) => {setCampaign(_campaign_id) }
+    campaign: campaign,
+    useCampaign: (_campaign) => {setCampaign(_campaign) }
   }
 
   return (

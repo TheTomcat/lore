@@ -12,21 +12,15 @@
   --font-body: 'Libre Baskerville';
   
   /* colour definitions */
-  --text-1: #b6b6b6;
-  --text-2: #ececec;
-  --text-3: #ffffff;
-  --bg-1: #232323;
-  --bg-2: #141418;
+  --text-main: #ccc;
+  --text-nav: #888;
+  --bg-main: #282828;
+  --bg-nav: #000;
+  --bg-side: #444;
   
   --highlight-1: #1278b3; /* df49a6*/
   --highlight-2: #7ec5ff; /* ff7eee */
   
-  --nav-background: #000; 
-  --tree-background: var(--bg-primary);
-  --content-background: var(--bg-secondary);
-
-  --sidebar-background:  var(--tree-background);
-
   --box-shadow: #337696;
   --link-not-exists: #BA0000;
   --link-colour: #0064c8;
@@ -45,25 +39,32 @@
 
 main {
   margin-left: 5rem;
-  padding: 1rem;
+  padding: 3rem;
+  background-color: var(--bg-main);
 }
 
 body::-webkit-scrollbar {
   width: 0.25rem;
 }
 body::-webkit-scrollbar-track {
-  background: var(--bg-1);
+  background: var(--bg-side);
 }
 body::-webkit-scrollbar-thumb {
   background: var(--highlight-1);
 }
 
+body::-webkit-scrollbar:hover {
+  width: 0.5rem;
+  transition: width var(--transition-speed) ease;
+}
+
 .navbar {
   height: 100vh;
   position: fixed;
-  background-color: var(--bg-1);
-  transition: width 600ms ease;
+  background-color: var(--bg-nav);
+  transition: width var(--transition-speed) ease;
   left: 0;
+  overflow:hidden;
 }
 
 .navbar-nav {
@@ -78,6 +79,7 @@ body::-webkit-scrollbar-thumb {
 
 .nav-item {
   width: 100%;
+  box-sizing:border-box;
 }
 
 .nav-item:last-child {
@@ -88,16 +90,21 @@ body::-webkit-scrollbar-thumb {
   display: flex;
   align-items: center;
   height: 5rem;
-  color: var(--text-1);
+  color: var(--text-nav);
   text-decoration: none;
   filter: grayscale(100%) opacity(0.7);
   transition: var(--transition-speed);
 }
 
+.nav-link.active {
+  border-left: 0.5rem solid var(--text-main);
+  color: var(--text-main);
+  width: 4.5rem;
+}
 .nav-link:hover {
   filter: grayscale(0%) opacity(1);
   background: var(--bg-2);
-  color: var(--text-2);
+  color: var(--highlight-1);
 }
 
 .link-text {
@@ -294,9 +301,7 @@ button {
   text-decoration: none;
 }
 
-.nav-item.active {
-    border-left: 0.5rem solid var(--text-primary);
-}
+
 
 .nav-item:last-child {
   margin-top: auto;
