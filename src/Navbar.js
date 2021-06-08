@@ -10,12 +10,6 @@ const Navbar = () => {
         {uri: '/blank', id: 'blank2', icon: <FiFile />, label:'Blank'}
     ];
     
-    // [ active, setActive ] = useState();
-
-    // const handleClick = (active_id) => {
-    //     setActive(active_id)
-    // }
-
     return (
         <nav className="navbar">
             <ul className="navbar-nav">

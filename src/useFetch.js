@@ -1,24 +1,22 @@
 import {useState, useEffect} from 'react';
 const axios = require('axios');
 
-const useFetch = ( uri ) => {
+const useFetch = ( uri, method="GET", body ={} ) => {
     
     const [data, setData] = useState(null);
     const [isPending, setIsPending] = useState(true);
     const [error, setError] = useState(null);
 
     useEffect( () => {
+        setIsPending(true);
         const options = {
             url: uri,
-            method:'get'
+            method:method,
+            data:body
         }
         setTimeout(() => {
         axios(options)
         .then(res => {
-            // if (!res.ok) {
-            //     throw Error('Could not fetch data from that resource');
-            // }
-            // console.log(res.data);
             setError(null);
             setData(res.data);
             setIsPending(false);

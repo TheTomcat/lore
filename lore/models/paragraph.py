@@ -13,6 +13,7 @@ class Paragraph(db.Model):
     title = db.Column(db.String)
     body = db.Column(db.String)
     order = db.Column(db.Integer)
+    style = db.Column(db.String)
         
     # Tracking changes
     edited_by_id = db.Column(db.Integer, db.ForeignKey('users.user_id'))
