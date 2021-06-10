@@ -29,8 +29,11 @@ def token_required(f):
         return f(current_user, *args, **kwargs)
     return decorated
 
-def build_response(message, code=200):
-    return {'message': message}, code
+def build_response(message, code=200, obj=None, sch=None):
+    ret = {'message': message}
+    if obj is not None and sch is not None:
+        ret['obj'] = sch.dump(obj)
+    return ret, code
 
 def get_all(obj, sch, endpoint, paginate=False):
     try:
@@ -61,6 +64,7 @@ def get_all(obj, sch, endpoint, paginate=False):
                      }
         return output #sch.dump(obj.query.all())
     except Exception as e:
+        print(str(e))
         return build_response(f"error {str(e)}", 500)
 
 def get_one(obj, sch, pk, **kwargs):
@@ -73,6 +77,7 @@ def get_one(obj, sch, pk, **kwargs):
             return build_response('no such object', 404)
         return sch.dump(o)
     except Exception as e:
+        print(str(e))
         return build_response(f"error {str(e)}", 500)
 def remove(obj, sch, pk):
     try:
@@ -92,7 +97,7 @@ def create(obj, sch):
         o = obj(**sch.load(data=data))
         db.session.add(o)
         db.session.commit()
-        return build_response("added")
+        return build_response(f"added: {sch.dumps(o)}")
     except Exception as e:
         return build_response(f"error: {str(e)}", 500)
 def update(obj, sch, pk):
@@ -171,10 +176,34 @@ def remove_page(pk):
 def update_page(pk):
     return update(Page, page_schema, pk)
 
+def make_nav(page):
+    return {'key':page.page_id,
+            'title':page.title,
+            'stub':page.stub,
+            'children':[make_nav(i) for i in page.children]}
+
+def get_nav_dict(root_node):
+    return make_nav(root_node)
+    # if campaign.children:
+    #     output = []
+    #     for child in sorted(campaign.children, key=lambda x: x.order):
+    #         d = {'name':child.title, 
+    #                 'id':child.stub}
+    #         if len(child.children) == 0:
+    #             d['children'] = []
+    #         elif len(child.children) > 0 and depth==0:
+    #             d['load_on_demand'] = True
+    #         elif len(child.children) > 0 and depth != 0:
+    #             d['children'] = child.get_nav_dict(depth=depth-1)
+    #             d['load_on_demand'] = True
+    #         output.append(d)
+    #     return output
+    # return []
+
 def as_tree(page, return_children=True):
     tree = {
-        'page_id': page.page_id,
-        'page_title': page.title,
+        'key': page.page_id,
+        'title': page.title,
         #'has_children': page.has_children,
         'num_children': len(page.children),
         'get_children': url_for('api.get_page_tree', pk=page.page_id),

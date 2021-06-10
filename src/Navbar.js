@@ -1,4 +1,4 @@
-import { NavLink  } from 'react-router-dom';
+import { NavLink, withRouter  } from 'react-router-dom';
 import { FiUsers, FiBookOpen, FiFile } from 'react-icons/fi'
 //https://react-icons.github.io/react-icons/
 const Navbar = () => {
@@ -13,6 +13,12 @@ const Navbar = () => {
     return (
         <nav className="navbar">
             <ul className="navbar-nav">
+                <li className="logo">
+            <a href="#" className="nav-link">
+            <span className="link-text logo-text">Lore</span>
+            
+            </a>
+        </li>
                 { links.map((item) => (
                     <li className="nav-item" key={item.id}>
                         <NavLink className="nav-link" activeClassName="active" to={item.uri}>
@@ -21,9 +27,10 @@ const Navbar = () => {
                         </NavLink>
                     </li>
                 ))}
+                {/* <li></li> */}
             </ul>
         </nav>
     )
 }
 
-export default Navbar;
+export default withRouter(Navbar);

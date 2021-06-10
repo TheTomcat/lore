@@ -27,3 +27,7 @@ class Config(object):
     JWT_REFRESH_TOKEN_EXPIRES = timedelta(days=30)
 
     HASHID_SALT = os.environ.get('HASHIDS_SALT') or 'not very secure'
+
+class TestConfig(Config):
+    TESTING=True
+    SQLALCHEMY_DATABASE_URI = f'sqlite:///{os.path.join(basedir, "test.db")}'

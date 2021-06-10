@@ -26,25 +26,28 @@ class User(db.Model):
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
 
-    def delete(self):
-        self.is_active = False
+    def seen(self):
+        self.last_seen = datetime.utcnow()
 
-    @classmethod
-    def create_dummy_data(cls):
-        users = ["Aaron Aaronsson",
-                 "Belinda Baghurst",
-                 "Charlie Chapman",
-                 "Dorothy Dolittle",
-                 "Ebinezer Egghurst",
-                 "Frances Ferdinand",
-                 "Gary Gygax",
-                 "Heather Hobson",
-                 "Irwin Ipping",
-                 "Jolene Jameson"]
-        for user in users:
-            lcase = user.replace(" ","").lower()
-            u = cls(username = lcase,
-                    email = f'{lcase}@test.com',
-                    is_active=True)
-            u.set_password('verystrong')
-            yield u
+    # def delete(self):
+    #     self.is_active = False
+
+    # @classmethod
+    # def create_dummy_data(cls):
+    #     users = ["Aaron Aaronsson",
+    #              "Belinda Baghurst",
+    #              "Charlie Chapman",
+    #              "Dorothy Dolittle",
+    #              "Ebinezer Egghurst",
+    #              "Frances Ferdinand",
+    #              "Gary Gygax",
+    #              "Heather Hobson",
+    #              "Irwin Ipping",
+    #              "Jolene Jameson"]
+    #     for user in users:
+    #         lcase = user.replace(" ","").lower()
+    #         u = cls(username = lcase,
+    #                 email = f'{lcase}@test.com',
+    #                 is_active=True)
+    #         u.set_password('verystrong')
+    #         yield u

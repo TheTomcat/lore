@@ -29,6 +29,7 @@ const PageEditor = (props) => {
 
 const ParagraphEditor = (props) => {
   const body = useRef("");
+  const pre = useRef("");
   const title = useRef("");
   const [ isPending, setIsPending ] = useState(true);
   const [ error, setError ] = useState(null);
@@ -98,10 +99,18 @@ const ParagraphEditor = (props) => {
     allowedTags: ["b", "i", "em", "strong", "a", "h1"],
     allowedAttributes: { a: ["href"] }
   };
+  const handleFocus = () => {
+    pre.current = body.current;
+  }
   const handleBlur = () => {
-    console.log("BLURRED")
+    console.log("blurred");
+    if (body.current !== pre.current) {
     body.current = sanitizeHtml(body.current, sanitizeConf);
+    console.log("Edited");
     putData(props.id);
+
+    }
+    // 
   };
   const toggleEditable = () => {
     setEditable(!editable);
@@ -121,6 +130,7 @@ const ParagraphEditor = (props) => {
           disabled={!editable} // use true to disable edition
           onChange={handleChange} // handle innerHTML change
           onBlur={handleBlur}
+          onFocus={handleFocus}
         />
       </>
     }

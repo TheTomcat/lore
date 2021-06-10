@@ -1,5 +1,5 @@
-from typing import Type
-from sqlalchemy import TypeDecorator, String, Integer
+from sqlalchemy import TypeDecorator, String
+from string import ascii_letters, digits
 
 class StubError(ValueError):
     pass
@@ -12,37 +12,27 @@ def validate_stub(stub, strip=False):
     return an acceptable output stub (or throw an error). If strip, will
     remove all prohibited values and return the validated stub. If not strip,
     will raise ValueError.
-    Allowed characters are letters, digits, underscore and hyphen.
-    Case insensitive."""
-
-    PROHIBITED = '!"#$%&\'()*+,./:;<=>?@[\\]^`{|}~' + '\t\n\r\x0b\x0c'
-    # string.punctuation (without - or _)
+    Allowed characters are letters, digits, underscore and hyphen or parentheses.
+    Spaces are cast to underscores.
+    Case insensitive, stub returned is cast to lowercase"""
+    ALLOWED = ascii_letters+digits+'()_-'
     stub = stub.replace(" ","_")
-    if strip:
-        for c in PROHIBITED:
-            stub = stub.replace(c,"")
-        return stub.lower()
-    else:
-        if any([c in stub for c in PROHIBITED]):
-            raise StubError("Invalid Stub. Invalid characters.")
-        return stub.lower()
+    try:
+        output = ''
+        for c in tuple(stub):
+            if c not in ALLOWED:
+                if not strip:
+                    raise StubError(f"Invalid Stub. Invalid Character {c}")
+                continue
+            output += c
+        return output.lower()
+    except Exception as e:
+        raise StubError("Error occured processing stub") from e
 
 class Stub(TypeDecorator):
     impl = String
+    cache_ok=False
     def process_bind_param(self, value, dialect):
         return validate_stub(value)
     def compare_against_backend(self, _, conn_type):
         return isinstance(conn_type, String)
-    
-# class TUID(TypeDecorator):
-#     impl = Integer
-#     def __init__(self, *args, **kwargs):
-#         # if "salt" not in kwargs:
-#         #     kwargs['salt'] = "not at all secure"
-#         self.hashid = hashids.Hashids("not secure")
-#         super().__init__(*args, **kwargs)
-
-#     def process_bind_param(self, value, dialect):
-#         return self.hashid.encode(value)
-#     def process_result_value(self, value, dialect):
-#         return self.hashid.decode(value)[0]

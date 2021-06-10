@@ -8,9 +8,9 @@ from lore.models.page import Page
 from lore.models.alias import Alias
 from lore.models.tag import Tag
 from lore.models.secondary import campaign_membership
-from lore.stub import Stub
+from lore.stub import Stub, validate_stub
 
-SALT = "not so securesd"
+SALT = "campaign"
 
 class Campaign(db.Model):
     __tablename__ = "campaigns"
@@ -38,16 +38,19 @@ class Campaign(db.Model):
         return self._hasher.encode(self.campaign_id)
     
     @classmethod
-    def uid_get(self, uid):
-        ids = self._hasher.decode(uid)
+    def uid_get(cls, uid):
+        ids = cls._hasher.decode(uid)
         if len(ids) == 1:
-            return Campaign.query.get(ids[0])
+            return cls.query.get(ids[0])
         else:
-            return Campaign.query.filter(Campaign.campaign_id.in_(ids)).all()
+            return cls.query.filter(cls.campaign_id.in_(ids)).all()
 
-    # @property
-    # def uid(self):
-    #     return hasher(self.campaign_id)
+    @classmethod
+    def get_from_stub(cls, stub):
+        return cls.query.filter_by(stub=validate_stub(stub)).first()
+
+    def is_member(self, user):
+        return user == self.owner or user in self.members
 
     # media = db.relationship("Media", back_populates="campaign")
     # groups = db.relationship("Group", back_populates="campaign")
@@ -104,22 +107,25 @@ class Campaign(db.Model):
         self.root_node = n
         return n
 
-    # def create_default_groups(self):
-    #     admin = Group(name="Admin", campaign=self)
-    #     admin.add_user(self.owner)
-    #     self.groups.append(admin)
-    #     return admin
-
     def add_user(self, user):
         if user not in self.members:
             self.members.append(user)
             return True
         return False
     def remove_user(self, user):
+        if user == self.owner:
+            raise ValueError("Cannot remove the owner of this campaign")
         if user in self.members:
             self.members.remove(user) # Remove the user 
             # for group in self.groups:
             #     group.remove_user(user) # And remove from all permission groups
             return True 
         return False
+    def change_ownership(self, new_owner):
+        self.owner = new_owner
 
+    # def create_default_groups(self):
+    #     admin = Group(name="Admin", campaign=self)
+    #     admin.add_user(self.owner)
+    #     self.groups.append(admin)
+    #     return admin

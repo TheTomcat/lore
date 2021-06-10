@@ -7,6 +7,7 @@ import PageDetails from './PageDetails';
 import NotFound from './NotFound';
 import Login from './Login'
 import PageEditor from './PageEditor';
+import PageTree from './PageTree';
 import { IconContext } from 'react-icons/lib';
 
 export const UserContext = createContext();
@@ -28,30 +29,37 @@ function App() {
   }
 
   return (
-    <UserContext.Provider value={currentUser}>
-      <CampaignContext.Provider value={currentCampaign}>
-        <Router>
-          <div className="App">
-            <IconContext.Provider value={{ className: 'react-icons', size:'2rem' }}>
-              <Navbar />
-            </IconContext.Provider>
-            <main>
-              <div className="content">
-                <Switch>
-                  <Route exact path="/" component={Home} />
-                  <Route exact path="/create" component={Create} />
-                  <Route exact path="/Test/:id" component={PageEditor} />
-                  <Route exact path="/login" component={Login} />
-                  <Route path="/page/:id" component={PageDetails} />
-                  <Route path="*" component={NotFound} />
-                </Switch>
-              </div>
-            </main>
-          </div>
-        </Router>
+    <PageTree />
+    // <UserContext.Provider value={currentUser}>
+    //   <CampaignContext.Provider value={currentCampaign}>
+    //     <Router>
+    //       <div id="main" className="App">
+    //         <IconContext.Provider value={{ className: 'react-icons', size:'2rem' }}>
+    //           <div id="nav">
+    //             <Navbar />
+    //           </div>
+    //         </IconContext.Provider>
+    //         <div id="tree">
+    //         <PageTree />
+    //         </div>
+    //           <div id="content" className="content">
+    //           <main>
+    //             <Switch>
+    //               <Route exact path="/" component={Home} />
+    //               <Route exact path="/create" component={Create} />
+    //               <Route exact path="/Test/:id" component={PageEditor} />
+    //               <Route exact path="/login" component={Login} />
+    //               <Route path="/page/:id" component={PageDetails} />
+    //               <Route path="*" component={NotFound} />
+    //             </Switch>
+    //             </main>
+    //           </div>
+            
+    //       </div>
+    //     </Router>
         
-      </CampaignContext.Provider>
-    </UserContext.Provider>
+    //   </CampaignContext.Provider>
+    // </UserContext.Provider>
   );
 }
 
