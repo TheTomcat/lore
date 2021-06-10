@@ -3,7 +3,7 @@ from datetime import datetime
 from sqlalchemy import TypeDecorator, String
 import hashids
 
-from lore import db, ma 
+from lore import db
 from lore.models.page import Page
 from lore.models.alias import Alias
 from lore.models.tag import Tag

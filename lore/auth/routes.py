@@ -5,6 +5,8 @@ from flask_jwt_extended import (create_access_token, create_refresh_token,
 from lore.auth import bp
 from lore.models.user import User
 
+# https://yasoob.me/posts/how-to-setup-and-deploy-jwt-auth-using-react-and-flask/
+
 @bp.post("/login")
 def login():
     username = request.json.get("username", None)
