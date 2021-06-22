@@ -8,7 +8,7 @@ class Tag(db.Model):
 
     parent_tag_id = db.Column(db.Integer, db.ForeignKey('tags.tag_id'))
     child_tag = db.relationship('Tag')
-    parent_tag = db.relationship('Tag', remote_side=[tag_id])
+    parent_tag = db.relationship('Tag', remote_side=[tag_id], back_populates='child_tag')
 
     pages = db.relationship('Page', secondary=page_tags, back_populates='tags')
 

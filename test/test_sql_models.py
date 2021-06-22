@@ -106,12 +106,26 @@ class CampaignModelTest(LoreTestCase):
 
 class PageModelTest(LoreTestCase):
     def test_create_page(self):
+        "Test that we can create a page."
         pass
     def test_page_stub_uniqueness(self):
         pass
     def test_page_tree_structure(self):
         pass
+    def test_make_new_paragraph(self):
+        pass
+    def test_reorder_paragraphs(self):
+        pass
     
+class AliasModelTest(LoreTestCase):
+    def test_create_alias(self):
+        pass
+    def test_create_duplicate_alias(self):
+        pass
+    def test_remove_alias(self):
+        pass
+    def test_get_all_page_aliases(self):
+        pass
 
 # REM Create some users
 # http -b post http://127.0.0.1:5000/user username=testus2er email=test2user1@test.com password=verystrong

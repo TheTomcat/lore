@@ -24,3 +24,15 @@ class Paragraph(db.Model):
     @property
     def campaign_id(self):
         return self.page.campaign_id
+    
+    @classmethod
+    def get(cls, page_id):
+        return cls.query.filter_by(page_id=page_id).first()
+    
+    def update(self, body, user):
+        self.body = body
+        self.edited_on = datetime.utcnow()
+        self.edited_by_id = user
+
+    def can(self, user, permission):
+        return self.page.can(user, permission)

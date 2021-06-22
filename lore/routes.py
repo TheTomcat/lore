@@ -6,11 +6,40 @@ from flask import Blueprint, request, make_response, url_for
 from werkzeug.security import generate_password_hash, check_password_hash
 from marshmallow import ValidationError
 import jwt
+from flask_socketio import join_room, emit, send
 
 api = Blueprint('api', __name__)
 
-from lore import db
+from lore import db, socketio
 from lore.models.schema import *
+
+def validate_user(user_id, document_id):
+    pass
+
+@socketio.event
+def connect():
+    print("Connected")
+
+@socketio.on('get-document')
+def get_document(data):
+    # print(f"GET DOCUMENT: req: {data}")
+    user = data['user'] # Validate user
+    join_room(data['document'])
+    doc = Paragraph.get(data['document'])
+    # print(doc.body)
+    emit('load-document', doc.body)
+
+@socketio.on('send-changes')
+def send_changes(data, **kwargs):
+    # print(f"SEND CHANGES: req: {data}")
+    emit('receive-changes', data['delta'], broadcast=True, include_self=False, room=data['document'])
+
+@socketio.on('save-document')
+def save_document(data, **kwargs):
+    doc = data['delta']['ops'][0]['insert']
+    print(doc)
+    # pass
+    #print(f"SAVE-DOCUMENT: req: {data}")
 
 def token_required(f):
     @wraps(f)

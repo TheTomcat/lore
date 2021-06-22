@@ -7,6 +7,7 @@ from flask_migrate import Migrate
 from flask_marshmallow import Marshmallow
 from flask_jwt_extended import JWTManager
 from flask_cors import CORS
+from flask_socketio import SocketIO
 
 from logging.handlers import RotatingFileHandler
 
@@ -17,6 +18,7 @@ migrate = Migrate()
 ma = Marshmallow()
 jwt = JWTManager()
 cors = CORS()
+socketio = SocketIO(cors_allowed_origins="*")
 
 def create_app(config_class=Config):
     app = Flask(__name__)
@@ -27,6 +29,7 @@ def create_app(config_class=Config):
     ma.init_app(app)
     jwt.init_app(app)
     cors.init_app(app)
+    socketio.init_app(app)
 
     from lore.routes import api
     app.register_blueprint(api)
