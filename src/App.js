@@ -10,6 +10,7 @@ import PageEditor from './PageEditor';
 import PageTree from './PageTree';
 import { IconContext } from 'react-icons/lib';
 import QuillComponent from './QuillComponent';
+import CharacterSheet from './CharacterSheet';
 
 export const UserContext = createContext();
 export const CampaignContext = createContext();
@@ -51,6 +52,7 @@ function App() {
                   <Route exact path="/login" component={Login} />
                   <Route path="/page/:id" component={PageDetails} />
                   <Route path="/pedit/:id" component={QuillComponent } />
+                  <Route path="/char" component={CharacterSheet} />
                   <Route path="*" component={NotFound} />
                 </Switch>
                 </main>
